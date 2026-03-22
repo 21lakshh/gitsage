@@ -16,9 +16,9 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Skal Ventures",
-  description: "Investment strategies that outperform the market",
-  generator: 'v0.app'
+  title: "OctoSage",
+  description: "Know who owns your code",
+  generator: 'OctoSage'
 };
 
 export default async function RootLayout({

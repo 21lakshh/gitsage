@@ -57,17 +57,6 @@ export function FinalCTA({ isLoggedIn }: { isLoggedIn?: boolean }) {
               </motion.button>
             </form>
           )}
-          <motion.div
-            data-cursor-hover
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <button
-              className="px-8 py-4 font-mono text-sm tracking-widest uppercase border border-zinc-800 rounded-full text-zinc-300 hover:text-white hover:border-zinc-700 bg-transparent transition-colors duration-500 w-full sm:w-auto"
-            >
-              Explore Features
-            </button>
-          </motion.div>
         </div>
 
         <p className="mt-8 text-sm text-zinc-500">Free to use for open source repositories.</p>
