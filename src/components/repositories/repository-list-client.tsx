@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 
 import { formatDistanceToNow } from "date-fns";
 import { ChevronRight, ShieldAlert, ShieldCheck } from "lucide-react";
@@ -62,15 +62,35 @@ const RepositorySkeleton = () => (
   </article>
 );
 
-export function RepositoryListClient() {
-  const [repositories, setRepositories] = useState<RepositorySummary[]>([]);
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+type RepositoryListClientProps = {
+  initialRepositories: RepositorySummary[];
+  initialPagination: {
+    page: number;
+    totalPages: number;
+    total: number;
+  };
+  pageSize?: number;
+};
+
+export function RepositoryListClient({
+  initialRepositories,
+  initialPagination,
+  pageSize = 9,
+}: RepositoryListClientProps) {
+  const [repositories, setRepositories] = useState<RepositorySummary[]>(initialRepositories);
+  const [pagination, setPagination] = useState(initialPagination);
   const [query, setQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const deferredQuery = useDeferredValue(query);
+  const hydratedPageRef = useRef(initialPagination.page);
 
   useEffect(() => {
+    if (hydratedPageRef.current === pagination.page) {
+      hydratedPageRef.current = -1;
+      return;
+    }
+
     let cancelled = false;
 
     async function loadRepositories() {
@@ -78,7 +98,7 @@ export function RepositoryListClient() {
       setError(null);
 
       try {
-        const response = await fetch(`/api/v1/repositories?page=${pagination.page}&limit=9`, { cache: "no-store" });
+        const response = await fetch(`/api/v1/repositories?page=${pagination.page}&limit=${pageSize}`, { cache: "no-store" });
 
         if (!response.ok) {
           throw new Error("Unable to load repositories.");
@@ -106,7 +126,7 @@ export function RepositoryListClient() {
     return () => {
       cancelled = true;
     };
-  }, [pagination.page]);
+  }, [pagination.page, pageSize]);
 
   const filteredRepositories = repositories.filter((repository) =>
     repository.fullName.toLowerCase().includes(deferredQuery.trim().toLowerCase()),

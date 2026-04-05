@@ -1,8 +1,34 @@
 import { RepositoryListClient } from "@/src/components/repositories/repository-list-client";
+import { requireCurrentUser } from "@/src/services/auth/service";
+import { listRepositorySummariesForUser, syncRepositoriesForUser } from "@/src/services/repositories/service";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { redirect } from "next/navigation";
 
-export default function RepositoriesPage() {
+const REPOSITORIES_PAGE_SIZE = 9;
+
+type RepositoriesPageProps = {
+  searchParams?: Promise<{
+    page?: string;
+  }>;
+};
+
+export default async function RepositoriesPage({ searchParams }: RepositoriesPageProps) {
+  const user = await requireCurrentUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const page = Math.max(1, Number.parseInt(resolvedSearchParams?.page ?? "1", 10) || 1);
+
+  if (page === 1) {
+    await syncRepositoriesForUser(user.id);
+  }
+
+  const initialRepositoriesPage = await listRepositorySummariesForUser(user.id, page, REPOSITORIES_PAGE_SIZE);
+
   return (
     <main className="space-y-6 pt-24 pb-32 px-4 bg-[#050505] min-h-screen">
       <div className="max-w-6xl mx-auto">
@@ -27,7 +53,15 @@ export default function RepositoriesPage() {
         </section>
 
         <div className="mt-8">
-          <RepositoryListClient />
+          <RepositoryListClient
+            initialRepositories={initialRepositoriesPage.data}
+            initialPagination={{
+              page: initialRepositoriesPage.page,
+              totalPages: initialRepositoriesPage.totalPages,
+              total: initialRepositoriesPage.total,
+            }}
+            pageSize={REPOSITORIES_PAGE_SIZE}
+          />
         </div>
       </div>
     </main>
