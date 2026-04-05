@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-
+import Image from "next/image"
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 
@@ -28,7 +28,14 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="font-bold text-xl text-white tracking-tight">gitsage</span>
+              <Image
+                src="/icon.png"
+                alt="gitsage logo"
+                width={32}
+                height={32}
+                className="rounded-md"
+              />
+              <span className="font-mono text-xl font-bold text-foreground/90 tracking-widest">gitsage</span>
             </Link>
             <p className="text-sm text-zinc-500 mb-4">A GitHub-native map of who really knows your codebase.</p>
             {/* System Status */}

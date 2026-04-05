@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { signInWithGitHubAction, signOutAction } from "@/src/actions/auth"
 import { Github } from "lucide-react"
+import Image from "next/image"
 
 export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -35,8 +36,14 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
             }}
             className="group flex items-center gap-2"
           >
-            <span className="font-mono text-xs tracking-widest text-muted-foreground">gitsage</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-accent group-hover:scale-150 transition-transform duration-300" />
+            <Image
+              src="/icon.png"
+              alt="gitsage logo"
+              width={32}
+              height={32}
+              className="rounded-md group-hover:scale-110 transition-transform duration-300"
+            />
+            <span className="font-mono text-xl font-bold tracking-widest text-foreground/90">gitsage</span>
           </a>
 
           {/* GitHub Action Connect */}
