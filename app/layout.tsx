@@ -16,9 +16,22 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "gitsage",
-  description: "Know who owns your code",
-  generator: 'gitsage'
+  title: "GitSage | GitHub Code Ownership & Bus Factor Mapper",
+  description: "Map GitHub code ownership and identify bus factor risks. GitSage analyzes commit history to help engineering teams find active owners and prevent knowledge silos.",
+  generator: 'gitsage',
+  keywords: ["github", "code ownership", "engineering management", "bus factor", "risk analysis", "code reviewers", "knowledge silos"],
+  openGraph: {
+    title: "GitSage | Know who owns your code",
+    description: "Map GitHub code ownership and identify bus factor risks. GitSage analyzes commit history to help engineering teams find active owners.",
+    // url: "",
+    siteName: "gitSage",
+    type: "website",
+  },
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default async function RootLayout({
