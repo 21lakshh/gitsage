@@ -26,7 +26,7 @@ export function FinalCTA({ isLoggedIn }: { isLoggedIn?: boolean }) {
           Ready to map your codebase?
         </h2>
         <p className="text-lg sm:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
-          Join leading teams already building with OctoSage. See who actually owns your code.
+          Join leading teams already building with gitsage. See who actually owns your code.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">

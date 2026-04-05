@@ -50,12 +50,12 @@ function TargetPRCard() {
               Find the developer who has been shaping the code that changed most recently, rather than pinging a teammate who touched it a year ago.
             </p>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-3 mt-8">
             <div className="flex -space-x-2">
-               <img src="https://github.com/shadcn.png" className="w-8 h-8 rounded-full border-2 border-zinc-950" alt="" />
-               <img src="https://github.com/leerob.png" className="w-8 h-8 rounded-full border-2 border-zinc-950" alt="" />
-               <div className="w-8 h-8 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-medium">+3</div>
+              <img src="https://github.com/shadcn.png" className="w-8 h-8 rounded-full border-2 border-zinc-950" alt="" />
+              <img src="https://github.com/leerob.png" className="w-8 h-8 rounded-full border-2 border-zinc-950" alt="" />
+              <div className="w-8 h-8 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-medium">+3</div>
             </div>
             <span className="text-xs text-zinc-500 font-medium">Mapped from GitHub history</span>
           </div>
@@ -151,20 +151,20 @@ function TargetPRCard() {
           </svg>
 
           {/* Graph Nodes */}
-          
+
           {/* Node 1: Dev Lead */}
-          <motion.div 
+          <motion.div
             className="absolute top-[18%] left-[12%] group/node z-20"
             whileHover={{ scale: 1.05 }}
           >
             <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-900/90 backdrop-blur-md border border-[#58a6ff]/40 shadow-[0_0_20px_rgba(88,166,255,0.15)] group-hover/node:shadow-[0_0_25px_rgba(88,166,255,0.3)] group-hover/node:border-[#58a6ff]/60 transition-all">
-               <img src="https://github.com/shadcn.png" alt="Dev" className="w-9 h-9 rounded-lg opacity-90" />
-               <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
-                  <span className="text-[#58a6ff] font-medium">95%</span> ownership
-               </div>
+              <img src="https://github.com/shadcn.png" alt="Dev" className="w-9 h-9 rounded-lg opacity-90" />
+              <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
+                <span className="text-[#58a6ff] font-medium">95%</span> ownership
+              </div>
             </div>
             {/* Ping animation */}
-            <motion.div 
+            <motion.div
               className="absolute inset-0 rounded-xl border border-[#58a6ff]"
               animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0] }}
               transition={{ duration: 2.5, repeat: Infinity, delay: 0 }}
@@ -172,17 +172,17 @@ function TargetPRCard() {
           </motion.div>
 
           {/* Node 2: CI/CD Bot or Another Dev */}
-          <motion.div 
+          <motion.div
             className="absolute top-[15%] right-[12%] group/node z-20"
             whileHover={{ scale: 1.05 }}
           >
-             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)] group-hover/node:shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover/node:border-emerald-500/60 transition-all">
-               <img src="https://github.com/leerob.png" alt="Dev" className="w-7 h-7 rounded-lg opacity-90" />
-               <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
-                  <span className="text-emerald-400 font-medium">Auto</span> review
-               </div>
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900/90 backdrop-blur-md border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)] group-hover/node:shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover/node:border-emerald-500/60 transition-all">
+              <img src="https://github.com/leerob.png" alt="Dev" className="w-7 h-7 rounded-lg opacity-90" />
+              <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
+                <span className="text-emerald-400 font-medium">Auto</span> review
+              </div>
             </div>
-            <motion.div 
+            <motion.div
               className="absolute inset-0 rounded-xl border border-emerald-500"
               animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0] }}
               transition={{ duration: 3, repeat: Infinity, delay: 1 }}
@@ -190,32 +190,32 @@ function TargetPRCard() {
           </motion.div>
 
           {/* Node 3: Another Dev */}
-          <motion.div 
+          <motion.div
             className="absolute bottom-[10%] left-[22%] group/node z-20"
             whileHover={{ scale: 1.05 }}
           >
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900/90 backdrop-blur-md border border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.1)] group-hover/node:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all">
-               <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-xs font-medium text-purple-400">
-                 JD
-               </div>
-               <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
-                  <span className="text-purple-400 font-medium">Stale</span> code
-               </div>
+              <div className="w-7 h-7 rounded-lg bg-zinc-800 flex items-center justify-center text-xs font-medium text-purple-400">
+                JD
+              </div>
+              <div className="absolute -bottom-8 whitespace-nowrap px-2.5 py-1 rounded-md bg-zinc-900/95 border border-zinc-800 text-[10px] text-zinc-300 opacity-0 group-hover/node:opacity-100 transition-opacity shadow-xl z-50 pointer-events-none">
+                <span className="text-purple-400 font-medium">Stale</span> code
+              </div>
             </div>
           </motion.div>
 
           {/* Central Target Node: The PR Target */}
-          <motion.div 
+          <motion.div
             className="absolute w-24 h-24 rounded-2xl bg-zinc-950/90 backdrop-blur-md border border-[#58a6ff]/50 group-hover:border-[#58a6ff]/80 flex flex-col items-center justify-center z-30 shadow-[0_0_30px_rgba(88,166,255,0.2)] group-hover:shadow-[0_0_40px_rgba(88,166,255,0.3)] transition-all duration-500"
-            animate={{ 
+            animate={{
               y: [-3, 3, -3],
             }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <div className="absolute inset-0 rounded-2xl bg-linear-to-br from-[#58a6ff]/20 via-transparent to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            
+
             <div className="bg-zinc-900/90 p-2 rounded-xl mb-1.5 border border-white/10 shadow-inner group-hover:scale-110 transition-transform duration-300">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="m9 15 2 2 4-4" /></svg>
             </div>
             <span className="text-[11px] font-mono font-medium tracking-tight text-white/90">/src/core</span>
           </motion.div>
@@ -242,14 +242,14 @@ function DecayCurve() {
           <line x1="0" y1="60" x2="100" y2="60" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
           <line x1="0" y1="0" x2="0" y2="60" stroke="#333" strokeWidth="1" strokeDasharray="2 2" />
           <path d="M 0 0 Q 30 50 100 58 L 100 60 L 0 60 Z" fill="url(#decayGrad)" />
-          <motion.path 
+          <motion.path
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            d="M 0 0 Q 30 50 100 58" 
-            fill="none" 
-            stroke="#58a6ff" 
-            strokeWidth="2" 
+            d="M 0 0 Q 30 50 100 58"
+            fill="none"
+            stroke="#58a6ff"
+            strokeWidth="2"
           />
         </>
       )}
@@ -265,17 +265,17 @@ function RiskIndicator() {
         <span className="text-red-400">CRITICAL</span>
       </div>
       <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden flex">
-        <motion.div 
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: "74%" }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="h-full bg-red-500/80" 
+          className="h-full bg-red-500/80"
         />
-        <motion.div 
+        <motion.div
           initial={{ width: 0 }}
           animate={{ width: "26%" }}
           transition={{ duration: 1, delay: 0.7 }}
-          className="h-full bg-zinc-600" 
+          className="h-full bg-zinc-600"
         />
       </div>
       <div className="flex justify-between text-[10px] text-zinc-500">
@@ -290,11 +290,11 @@ function GitHistoryAnimation() {
   return (
     <div className="mt-6 h-16 relative flex items-center">
       <div className="absolute w-full h-[2px] bg-zinc-800 top-1/2 -translate-y-1/2" />
-      <motion.div 
+      <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 1.5, ease: "easeInOut" }}
-        className="absolute w-full h-[2px] bg-emerald-500/50 top-1/2 -translate-y-1/2 origin-left" 
+        className="absolute w-full h-[2px] bg-emerald-500/50 top-1/2 -translate-y-1/2 origin-left"
       />
       {[0, 40, 80].map((left, i) => (
         <motion.div
@@ -330,7 +330,7 @@ export function BentoGrid() {
             Always-current ownership <span className="italic font-serif text-zinc-400">intelligence</span>
           </h2>
           <p className="font-mono text-sm tracking-wider text-zinc-500 max-w-2xl mx-auto uppercase">
-            OctoSage combines GitHub history, recency scoring, and a visual repo graph.
+            gitsage combines GitHub history, recency scoring, and a visual repo graph.
           </p>
         </motion.div>
 
@@ -392,7 +392,7 @@ export function BentoGrid() {
             variants={itemVariants}
             className="group relative p-8 rounded-4xl bg-zinc-950/50 border border-white/5 hover:bg-white/4 transition-colors"
           >
-             <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 w-fit mb-5">
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 w-fit mb-5">
               <GitMerge className="w-5 h-5 text-zinc-300" />
             </div>
             <h3 className="text-lg font-medium text-white mb-2">Onboard with context</h3>

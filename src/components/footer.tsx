@@ -28,7 +28,7 @@ export function Footer() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="font-bold text-xl text-white tracking-tight">OctoSage</span>
+              <span className="font-bold text-xl text-white tracking-tight">gitsage</span>
             </Link>
             <p className="text-sm text-zinc-500 mb-4">A GitHub-native map of who really knows your codebase.</p>
             {/* System Status */}
@@ -62,7 +62,7 @@ export function Footer() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-16 pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
-          <p className="text-sm text-zinc-500">&copy; {new Date().getFullYear()} OctoSage. All rights reserved.</p>
+          <p className="text-sm text-zinc-500">&copy; {new Date().getFullYear()} gitsage. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
               Twitter

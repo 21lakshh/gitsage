@@ -16,9 +16,9 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "OctoSage",
+  title: "gitsage",
   description: "Know who owns your code",
-  generator: 'OctoSage'
+  generator: 'gitsage'
 };
 
 export default async function RootLayout({

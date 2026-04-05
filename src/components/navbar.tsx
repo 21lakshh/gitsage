@@ -22,9 +22,8 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled ? "bg-background/80 backdrop-blur-md border-b border-border" : ""
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? "bg-background/80 backdrop-blur-md border-b border-border" : ""
+          }`}
       >
         <nav className="flex items-center justify-between px-6 py-4 my-0 md:px-12 md:py-5">
           {/* Logo */}
@@ -36,7 +35,7 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
             }}
             className="group flex items-center gap-2"
           >
-            <span className="font-mono text-xs tracking-widest text-muted-foreground">OCTOSAGE</span>
+            <span className="font-mono text-xs tracking-widest text-muted-foreground">gitsage</span>
             <span className="w-1.5 h-1.5 rounded-full bg-accent group-hover:scale-150 transition-transform duration-300" />
           </a>
 
@@ -49,7 +48,7 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
               </span>
               <span className="font-mono text-xs tracking-wider text-muted-foreground">SYSTEM ONLINE</span>
             </div>
-            
+
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 <form action={signOutAction}>
