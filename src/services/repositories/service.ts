@@ -31,6 +31,8 @@ function mapRepositorySummary(
     fullName: repository.full_name,
     defaultBranch: repository.default_branch,
     isPrivate: repository.is_private,
+    providerUpdatedAt: repository.provider_updated_at,
+    providerPushedAt: repository.provider_pushed_at,
     lastSeenAt: repository.last_seen_at,
     hasSnapshot: Boolean(snapshot),
     lastAnalyzedAt,
@@ -114,6 +116,8 @@ export async function syncRepositoriesForUser(userId: string) {
       full_name: repository.fullName,
       default_branch: repository.defaultBranch,
       is_private: repository.isPrivate,
+      provider_updated_at: repository.providerUpdatedAt,
+      provider_pushed_at: repository.providerPushedAt,
       last_seen_at: now,
       updated_at: now,
     }));
@@ -140,7 +144,9 @@ export async function listRepositorySummariesForUser(userId: string, page = 1, l
     .from("repositories")
     .select("*", { count: 'exact' })
     .eq("user_id", userId)
-    .order("full_name")
+    .order("provider_pushed_at", { ascending: false, nullsFirst: false })
+    .order("provider_updated_at", { ascending: false, nullsFirst: false })
+    .order("last_seen_at", { ascending: false })
     .range(start, end);
 
   if (error) {

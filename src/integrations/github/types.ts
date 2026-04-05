@@ -11,6 +11,8 @@ export interface GitHubRepositoryRecord {
   fullName: string;
   defaultBranch: string;
   isPrivate: boolean;
+  providerUpdatedAt: string | null;
+  providerPushedAt: string | null;
 }
 
 export interface NormalizedAuthor {

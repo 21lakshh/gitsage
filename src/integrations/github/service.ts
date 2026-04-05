@@ -72,6 +72,8 @@ export async function listAccessibleRepositories(accessToken: string): Promise<G
     fullName: repository.full_name,
     defaultBranch: repository.default_branch,
     isPrivate: repository.private,
+    providerUpdatedAt: repository.updated_at,
+    providerPushedAt: repository.pushed_at,
   }));
 }
 

@@ -37,6 +37,8 @@ export interface RepositorySummary {
   fullName: string;
   defaultBranch: string;
   isPrivate: boolean;
+  providerUpdatedAt: string | null;
+  providerPushedAt: string | null;
   lastSeenAt: string;
   hasSnapshot: boolean;
   lastAnalyzedAt: string | null;

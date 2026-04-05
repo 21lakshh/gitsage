@@ -8,6 +8,10 @@ import { ChevronRight, ShieldAlert, ShieldCheck } from "lucide-react";
 
 import type { RepositorySummary } from "@/src/types/domain";
 
+function getRepositoryActivityTimestamp(repository: RepositorySummary) {
+  return repository.providerPushedAt ?? repository.providerUpdatedAt ?? repository.lastSeenAt;
+}
+
 function statusLabel(repository: RepositorySummary) {
   if (repository.latestRun?.status === "processing") {
     return `Analyzing ${repository.latestRun.progressPct}%`;
@@ -181,9 +185,9 @@ export function RepositoryListClient() {
                 <div className="mt-auto pt-6">
                   <div className="grid gap-2 grid-cols-3">
                     <div className="rounded-xl border border-white/10 bg-black/20 p-3 flex flex-col items-center justify-center text-center">
-                      <p className="text-[8px] sm:text-[9px] font-mono tracking-widest uppercase text-zinc-500">Seen</p>
+                      <p className="text-[8px] sm:text-[9px] font-mono tracking-widest uppercase text-zinc-500">Updated</p>
                       <p className="mt-1 text-xs font-light text-white truncate max-w-full">
-                        {formatDistanceToNow(new Date(repository.lastSeenAt), { addSuffix: true }).replace("about ", "")}
+                        {formatDistanceToNow(new Date(getRepositoryActivityTimestamp(repository)), { addSuffix: true }).replace("about ", "")}
                       </p>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-black/20 p-3 flex flex-col items-center justify-center text-center">
