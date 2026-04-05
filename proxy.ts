@@ -12,10 +12,14 @@ function isProtectedPath(pathname: string) {
   return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function shouldCheckAuth(pathname: string) {
+  return pathname === "/" || isProtectedPath(pathname);
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!isProtectedPath(pathname)) {
+  if (!shouldCheckAuth(pathname)) {
     return NextResponse.next();
   }
 
@@ -46,6 +50,17 @@ export async function proxy(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  if (pathname === "/") {
+    if (user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/repositories";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    return response;
+  }
 
   if (!user) {
     const redirectUrl = request.nextUrl.clone();
