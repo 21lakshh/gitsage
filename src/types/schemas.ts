@@ -4,7 +4,7 @@ export const providerSchema = z.literal("github");
 
 export const analysisRunStatusSchema = z.object({
   id: z.string().uuid(),
-  status: z.enum(["queued", "leased", "processing", "completed", "failed", "dead_letter"]),
+  status: z.enum(["queued", "processing", "completed", "failed", "dead_letter"]),
   progressPhase: z.string(),
   progressPct: z.number().min(0).max(100),
   errorMessage: z.string().nullable(),
@@ -15,11 +15,9 @@ export const analysisRunStatusSchema = z.object({
   commitWindowEnd: z.string(),
   commitLimit: z.number().int().positive(),
   snapshotId: z.string().uuid().nullable(),
+  currentStage: z.string(),
   attemptCount: z.number().int().nonnegative(),
   maxAttempts: z.number().int().positive(),
-  leasedAt: z.string().nullable(),
-  leaseExpiresAt: z.string().nullable(),
-  workerId: z.string().nullable(),
   lastErrorCode: z.string().nullable(),
   processedCommitCount: z.number().int().nonnegative(),
   selectedCommitCount: z.number().int().nonnegative(),

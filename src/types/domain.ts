@@ -1,7 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 
 export type Provider = "github";
-export type AnalysisRunState = "queued" | "leased" | "processing" | "completed" | "failed" | "dead_letter";
+export type AnalysisRunState = "queued" | "processing" | "completed" | "failed" | "dead_letter";
 export type RiskLevel = "critical" | "warning" | "healthy";
 export type AnalysisMode = "full" | "reduced" | "degraded";
 
@@ -18,11 +18,9 @@ export interface AnalysisRunStatus {
   commitWindowEnd: string;
   commitLimit: number;
   snapshotId: string | null;
+  currentStage: string;
   attemptCount: number;
   maxAttempts: number;
-  leasedAt: string | null;
-  leaseExpiresAt: string | null;
-  workerId: string | null;
   lastErrorCode: string | null;
   processedCommitCount: number;
   selectedCommitCount: number;

@@ -7,10 +7,9 @@ const serverEnvSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   GITHUB_TOKEN_ENCRYPTION_KEY: z.string().min(1),
   ANALYSIS_COMMIT_DETAIL_CONCURRENCY: z.coerce.number().int().positive().default(5),
-  ANALYSIS_QUEUE_VT_SECONDS: z.coerce.number().int().positive().default(900),
-  ANALYSIS_QUEUE_POLL_SECONDS: z.coerce.number().int().positive().default(5),
   ANALYSIS_LOCK_LEASE_SECONDS: z.coerce.number().int().positive().default(900),
   ANALYSIS_PROGRESS_BATCH_SIZE: z.coerce.number().int().positive().default(10),
+  ANALYSIS_COMMIT_BATCH_SIZE: z.coerce.number().int().positive().default(25),
 });
 
 const publicEnvSchema = serverEnvSchema.pick({

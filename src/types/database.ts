@@ -117,10 +117,11 @@ export interface Database {
           id: string;
           user_id: string;
           repository_id: string;
-          status: "queued" | "leased" | "processing" | "completed" | "failed" | "dead_letter";
+          status: "queued" | "processing" | "completed" | "failed" | "dead_letter";
           requested_at: string;
           started_at: string | null;
           finished_at: string | null;
+          current_stage: string;
           progress_phase: string;
           progress_pct: number;
           error_message: string | null;
@@ -144,10 +145,11 @@ export interface Database {
           id?: string;
           user_id: string;
           repository_id: string;
-          status?: "queued" | "leased" | "processing" | "completed" | "failed" | "dead_letter";
+          status?: "queued" | "processing" | "completed" | "failed" | "dead_letter";
           requested_at?: string;
           started_at?: string | null;
           finished_at?: string | null;
+          current_stage?: string;
           progress_phase?: string;
           progress_pct?: number;
           error_message?: string | null;
@@ -168,9 +170,10 @@ export interface Database {
           updated_at?: string;
         };
         Update: {
-          status?: "queued" | "leased" | "processing" | "completed" | "failed" | "dead_letter";
+          status?: "queued" | "processing" | "completed" | "failed" | "dead_letter";
           started_at?: string | null;
           finished_at?: string | null;
+          current_stage?: string;
           progress_phase?: string;
           progress_pct?: number;
           error_message?: string | null;
@@ -231,8 +234,6 @@ export interface Database {
         Row: {
           repository_id: string;
           run_id: string;
-          worker_id: string;
-          leased_at: string;
           lease_expires_at: string;
           created_at: string;
           updated_at: string;
@@ -240,17 +241,126 @@ export interface Database {
         Insert: {
           repository_id: string;
           run_id: string;
-          worker_id: string;
-          leased_at?: string;
           lease_expires_at: string;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           run_id?: string;
-          worker_id?: string;
-          leased_at?: string;
           lease_expires_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      analysis_job_claims: {
+        Row: {
+          msg_id: number;
+          run_id: string;
+          stage: string;
+          claimed_at: string;
+        };
+        Insert: {
+          msg_id: number;
+          run_id: string;
+          stage: string;
+          claimed_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      analysis_run_tree_files: {
+        Row: {
+          id: string;
+          run_id: string;
+          path: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_id: string;
+          path: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      analysis_run_commits: {
+        Row: {
+          id: string;
+          run_id: string;
+          commit_sha: string;
+          commit_sequence: number;
+          committed_at: string;
+          batch_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_id: string;
+          commit_sha: string;
+          commit_sequence: number;
+          committed_at: string;
+          batch_index: number;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      analysis_run_commit_files: {
+        Row: {
+          id: string;
+          run_id: string;
+          commit_sha: string;
+          commit_sequence: number;
+          committed_at: string;
+          owner_key: string;
+          owner_login: string | null;
+          display_name: string;
+          filename: string;
+          additions: number;
+          deletions: number;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_id: string;
+          commit_sha: string;
+          commit_sequence: number;
+          committed_at: string;
+          owner_key: string;
+          owner_login?: string | null;
+          display_name: string;
+          filename: string;
+          additions: number;
+          deletions: number;
+          status: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      analysis_run_stage_state: {
+        Row: {
+          run_id: string;
+          next_batch_index: number;
+          batch_size: number;
+          tree_file_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          run_id: string;
+          next_batch_index?: number;
+          batch_size?: number;
+          tree_file_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          next_batch_index?: number;
+          batch_size?: number;
+          tree_file_count?: number;
           updated_at?: string;
         };
         Relationships: [];
@@ -346,29 +456,26 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
-      acquire_repository_processing_lock: {
+      acquire_repository_run_lock: {
         Args: {
           target_repository_id: string;
           target_run_id: string;
-          target_worker_id: string;
           lease_seconds: number;
         };
         Returns: boolean;
       };
-      renew_repository_processing_lock: {
+      renew_repository_run_lock: {
         Args: {
           target_repository_id: string;
           target_run_id: string;
-          target_worker_id: string;
           lease_seconds: number;
         };
         Returns: boolean;
       };
-      release_repository_processing_lock: {
+      release_repository_run_lock: {
         Args: {
           target_repository_id: string;
           target_run_id: string;
-          target_worker_id: string;
         };
         Returns: boolean;
       };
