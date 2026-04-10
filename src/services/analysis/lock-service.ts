@@ -1,17 +1,15 @@
 import { getServerEnv } from "@/src/lib/env";
 import { createServiceRoleSupabaseClient } from "@/src/services/_shared/supabase";
 
-export async function acquireRepositoryProcessingLock(input: {
+export async function acquireRepositoryRunLock(input: {
   repositoryId: string;
   runId: string;
-  workerId: string;
 }) {
   const supabase = createServiceRoleSupabaseClient();
   const env = getServerEnv();
-  const { data, error } = await supabase.rpc("acquire_repository_processing_lock", {
+  const { data, error } = await supabase.rpc("acquire_repository_run_lock", {
     target_repository_id: input.repositoryId,
     target_run_id: input.runId,
-    target_worker_id: input.workerId,
     lease_seconds: env.ANALYSIS_LOCK_LEASE_SECONDS,
   });
 
@@ -22,17 +20,15 @@ export async function acquireRepositoryProcessingLock(input: {
   return Boolean(data);
 }
 
-export async function renewRepositoryProcessingLock(input: {
+export async function renewRepositoryRunLock(input: {
   repositoryId: string;
   runId: string;
-  workerId: string;
 }) {
   const supabase = createServiceRoleSupabaseClient();
   const env = getServerEnv();
-  const { data, error } = await supabase.rpc("renew_repository_processing_lock", {
+  const { data, error } = await supabase.rpc("renew_repository_run_lock", {
     target_repository_id: input.repositoryId,
     target_run_id: input.runId,
-    target_worker_id: input.workerId,
     lease_seconds: env.ANALYSIS_LOCK_LEASE_SECONDS,
   });
 
@@ -43,16 +39,14 @@ export async function renewRepositoryProcessingLock(input: {
   return Boolean(data);
 }
 
-export async function releaseRepositoryProcessingLock(input: {
+export async function releaseRepositoryRunLock(input: {
   repositoryId: string;
   runId: string;
-  workerId: string;
 }) {
   const supabase = createServiceRoleSupabaseClient();
-  const { data, error } = await supabase.rpc("release_repository_processing_lock", {
+  const { data, error } = await supabase.rpc("release_repository_run_lock", {
     target_repository_id: input.repositoryId,
     target_run_id: input.runId,
-    target_worker_id: input.workerId,
   });
 
   if (error) {

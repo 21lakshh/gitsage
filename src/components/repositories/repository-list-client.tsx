@@ -17,10 +17,6 @@ function statusLabel(repository: RepositorySummary) {
     return `Analyzing ${repository.latestRun.progressPct}%`;
   }
 
-  if (repository.latestRun?.status === "leased") {
-    return "Worker leased";
-  }
-
   if (repository.latestRun?.status === "queued") {
     return "Queued";
   }

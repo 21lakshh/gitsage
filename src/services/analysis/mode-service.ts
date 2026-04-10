@@ -1,6 +1,6 @@
-export const MAX_COMMIT_FETCH_LIMIT = 1_000;
-export const FULL_HISTORY_WINDOW_START = "1970-01-01T00:00:00.000Z";
+import { FULL_HISTORY_WINDOW_START, MAX_COMMIT_FETCH_LIMIT } from "@/src/services/analysis/runtime";
 
+// in case in future we want to add modes for fetching commits....
 export interface AnalysisModeSelection {
   analysisMode: "full";
   commitLimit: number;
