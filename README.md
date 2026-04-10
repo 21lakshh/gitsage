@@ -6,11 +6,11 @@ GitSage is a GitHub code ownership mapper for engineering teams. It connects to 
 - Who likely understands this area best right now?
 - Which modules are overly concentrated around one engineer?
 
-The product is split into a web app and a background analysis runtime:
+The product is split into a web app and a serverless analysis runtime:
 
 - The `Next.js` app handles UI, auth, server actions, and read APIs.
 - `Supabase` handles auth, Postgres storage, and queue-backed job dispatch.
-- A separate worker processes repository analysis jobs and writes immutable snapshots.
+- Supabase Edge Functions process repository analysis jobs and write immutable snapshots.
 
 ## Why This Exists
 
@@ -45,8 +45,9 @@ Static ownership systems like `CODEOWNERS` are useful, but they are still manual
 
 ### Background Processing
 
-- Dedicated TypeScript worker started with `pnpm worker`
-- Queue consumption via Supabase RPC wrappers over `pgmq`
+- Supabase Edge Functions
+- Database webhooks triggered from `pgmq`
+- Supavisor transaction pooling for direct Postgres access inside the function runtime
 
 ## Why This Architecture
 
@@ -64,7 +65,7 @@ This keeps responsibilities clear:
 - GitHub logic does not leak into pages or React components
 - The ownership algorithm remains a pure compute layer that is easier to test and evolve
 
-### Why Queue + Worker
+### Why Queue + Serverless Worker
 
 Repository analysis is not a request-response task. It can involve:
 
@@ -74,12 +75,12 @@ Repository analysis is not a request-response task. It can involve:
 - computing ownership over many files
 - persisting a snapshot and its related rows
 
-Running that inside the web request path would make the app slow and fragile. The queue + worker split gives us:
+Running that inside the web request path would make the app slow and fragile. The queue + staged serverless worker split gives us:
 
 - fast user-facing interactions
 - retryable background work
 - safe isolation for heavy GitHub fetches
-- a clean path to horizontal worker scaling later
+- automatic parallelism across repositories without always-on instances
 
 ### Why GitHub OAuth
 
@@ -88,7 +89,7 @@ GitSage is GitHub-first. Using GitHub OAuth through Supabase gives us:
 - a familiar login flow
 - repository access scoped to the user's GitHub account
 - no manual token entry in the UI
-- a provider token that can be encrypted and reused by the worker for async analysis
+- a provider token that can be encrypted and reused by the analysis runtime for async analysis
 
 ## Product Flow
 
@@ -98,14 +99,14 @@ GitSage is GitHub-first. Using GitHub OAuth through Supabase gives us:
 4. The app stores connected-account metadata and the encrypted provider token.
 5. The user visits `/repositories` and sees repositories they can access.
 6. They enqueue an analysis run for a repository.
-7. A worker picks up the job, analyzes the repository, and writes an immutable snapshot.
+7. A database webhook triggers the Edge Function runtime, which advances the analysis stage by stage and writes an immutable snapshot.
 8. The insights page reads the latest successful snapshot and shows ownership data.
 
 ## Analysis Pipeline
 
 ### High-Level Flow
 
-When a repository is analyzed, the worker does the following:
+When a repository is analyzed, the staged Edge Function runtime does the following:
 
 1. Fetch the current repository tree from the default branch.
 2. Filter out irrelevant files so the analysis focuses on actual code paths.
@@ -156,6 +157,23 @@ This gives us a balanced tradeoff:
 - friendlier to GitHub rate limits
 
 The concurrency level is configurable through `ANALYSIS_COMMIT_DETAIL_CONCURRENCY`.
+
+## Serverless Runtime
+
+Each repository analysis run is staged:
+
+1. `prepare`
+2. `discover_commits`
+3. `process_commit_batch`
+4. `finalize`
+
+One repository run advances sequentially through those stages, but different repositories can run in parallel because each queued stage insert triggers its own Edge Function invocation.
+
+Default runtime limits:
+
+- max commits per run: `1000`
+- commit batch size per invocation: `25`
+- commit-detail concurrency inside a batch: `5`
 
 ## Ownership Logic
 
@@ -251,7 +269,7 @@ The core tables are:
 
 ### Important Concepts
 
-- `analysis_runs` tracks queue state, processing state, retries, and progress
+- `analysis_runs` tracks stage state, retries, and progress
 - `analysis_snapshots` are immutable completed analysis outputs
 - `analysis_nodes` stores file/folder rows for a snapshot
 - `analysis_node_owners` stores ownership breakdowns per node
@@ -273,53 +291,39 @@ Responsibilities:
 - server actions for enqueueing analysis
 - read APIs under `app/api/v1/*`
 
-### Worker
+### Analysis Runtime
 
-The worker is intended to run outside Vercel as a separate long-running process.
+The analysis runtime is fully Supabase-native:
 
-Production target:
-
-- AWS EC2 Spot instances
-- Auto Scaling Group
-- one worker process per instance initially
+- `pgmq` stores stage jobs
+- a database webhook fires one HTTP request per queued stage
+- Supabase Edge Functions execute the stage
+- Supavisor transaction pooling is used for direct Postgres access inside the function
 
 Responsibilities:
 
-- read queued analysis jobs
+- receive queued stage jobs
 - acquire repository lock
 - fetch GitHub data
-- compute ownership
+- persist intermediate state between stages
 - write snapshots and status updates
 
 ### Why Split Deployments
 
-Vercel is a great fit for the web app, but heavy background analysis should not run inside Vercel functions. The separate worker runtime gives us:
+Vercel is a great fit for the web app, but heavy background analysis should not run inside Vercel functions. The staged Supabase runtime gives us:
 
-- better control over long-running jobs
 - retry-safe queue processing
+- serverless execution only when tasks exist
 - independent scaling from the frontend
 
-## Autoscaling Strategy
+## Runtime Concurrency
 
-Workers are queue consumers, so they should scale based on queue pressure, not web traffic.
+The current runtime is optimized for MVP scale:
 
-Good autoscaling signals include:
-
-- queue depth
-- oldest queued message age
-- optionally worker CPU / memory
-
-Example production behavior:
-
-- if several users enqueue analysis at once, queued jobs rise
-- more worker instances are launched
-- each worker claims one job and processes it independently
-
-Spot instances are a good fit because:
-
-- analysis jobs are interruptible and retryable
-- queue leasing allows safe recovery if an instance disappears
-- cost is much lower than always-on on-demand capacity
+- stages stay sequential within one repository run
+- commit batches stay sequential within one repository run
+- bounded concurrency is only used inside one batch for GitHub requests
+- multiple different repository runs can progress in parallel through independent Edge Function invocations
 
 ## Folder Structure
 
@@ -340,12 +344,12 @@ src/
     _shared/                Shared service-layer helpers like Supabase clients
     auth/                   Session and connected-account persistence
     repositories/           Repository sync and summary reads
-    analysis/               Queue, worker lifecycle, locks, status, errors
+    analysis/               Queue, staged run lifecycle, locks, status, errors
     ownership/              Ownership read models for the UI and APIs
   types/                    Database, domain, and validation types
-  worker/                   Standalone worker entrypoint
 
 supabase/
+  functions/                Edge Function worker runtime
   migrations/               Database and queue/runtime migrations
 ```
 
@@ -359,7 +363,7 @@ supabase/
 - `src/services/ownership/service.ts`
 - `src/integrations/github/service.ts`
 - `src/lib/analysis/ownership.ts`
-- `src/worker/index.ts`
+- `supabase/functions/process-analysis-job/index.ts`
 
 ## Environment Variables
 
@@ -373,10 +377,20 @@ Required:
 Optional tuning variables:
 
 - `ANALYSIS_COMMIT_DETAIL_CONCURRENCY`
-- `ANALYSIS_QUEUE_VT_SECONDS`
-- `ANALYSIS_QUEUE_POLL_SECONDS`
 - `ANALYSIS_LOCK_LEASE_SECONDS`
 - `ANALYSIS_PROGRESS_BATCH_SIZE`
+- `ANALYSIS_COMMIT_BATCH_SIZE`
+
+Edge Function secrets:
+
+- `SUPABASE_DB_URL` using the Supavisor transaction pooler connection string
+- `OWNERSHIP_ANALYSIS_WEBHOOK_SECRET`
+- `GITHUB_TOKEN_ENCRYPTION_KEY`
+
+Database Vault secrets used by the queue trigger:
+
+- `ownership_analysis_webhook_url`
+- `ownership_analysis_webhook_secret`
 
 ## Local Development
 
@@ -396,16 +410,44 @@ Create your local env file with the variables listed above.
 supabase db push
 ```
 
-### 4. Start the web app
+### 4. Configure function and webhook secrets
+
+Set Edge Function secrets:
+
+```bash
+supabase secrets set \
+  SUPABASE_DB_URL="..." \
+  OWNERSHIP_ANALYSIS_WEBHOOK_SECRET="..." \
+  GITHUB_TOKEN_ENCRYPTION_KEY="..."
+```
+
+Store the webhook URL and shared secret in Vault for the database trigger.
+
+Note: the extension name is `supabase_vault`, but the SQL API is exposed through the `vault` schema.
+For local development, use `host.docker.internal` so the database container can reach the Edge Function host:
+
+```sql
+select vault.create_secret(
+  'http://host.docker.internal:54321/functions/v1/process-analysis-job',
+  'ownership_analysis_webhook_url'
+);
+
+select vault.create_secret(
+  'your-shared-webhook-secret',
+  'ownership_analysis_webhook_secret'
+);
+```
+
+### 5. Start the web app
 
 ```bash
 pnpm dev
 ```
 
-### 5. Start the worker in another terminal
+### 6. Serve the Edge Function locally
 
 ```bash
-pnpm worker
+pnpm functions:serve
 ```
 
 ## Available Scripts
@@ -415,7 +457,7 @@ pnpm dev
 pnpm build
 pnpm start
 pnpm lint
-pnpm worker
+pnpm functions:serve
 ```
 
 ## Current Product Shape
@@ -434,7 +476,7 @@ The current `/repositories/[repositoryId]` experience is tree-first rather than 
 
 Planned and likely next steps include:
 
-- moving the worker runtime to Go for stronger concurrency and throughput
+- moving the staged runtime to Go for stronger concurrency and throughput
 - richer legacy-code and dead-code graphing
 - more advanced autoscaling signals for worker fleets
 - further refinement of ownership heuristics
