@@ -12,7 +12,7 @@ import {
 import { buildOwnershipAnalysis, type GitHubCommitActivity } from "../_shared/ownership.ts";
 
 const WEBHOOK_SECRET = Deno.env.get("OWNERSHIP_ANALYSIS_WEBHOOK_SECRET");
-const DB_URL = Deno.env.get("SUPABASE_DB_URL");
+const DB_URL = Deno.env.get("ANALYSIS_DATABASE_URL");
 const ENCRYPTION_KEY = Deno.env.get("GITHUB_TOKEN_ENCRYPTION_KEY");
 const COMMIT_DETAIL_CONCURRENCY = Number(Deno.env.get("ANALYSIS_COMMIT_DETAIL_CONCURRENCY") ?? "5");
 const COMMIT_BATCH_SIZE = Number(Deno.env.get("ANALYSIS_COMMIT_BATCH_SIZE") ?? String(DEFAULT_COMMIT_BATCH_SIZE));
@@ -81,7 +81,7 @@ const RETRYABLE_STATUSES = new Set([408, 409, 429, 500, 502, 503, 504]);
 
 function createDb() {
   if (!DB_URL) {
-    throw new Error("SUPABASE_DB_URL is required.");
+    throw new Error("ANALYSIS_DATABASE_URL is required.");
   }
 
   return postgres(DB_URL, {

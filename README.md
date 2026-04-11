@@ -383,7 +383,7 @@ Optional tuning variables:
 
 Edge Function secrets:
 
-- `SUPABASE_DB_URL` using the Supavisor transaction pooler connection string
+- `ANALYSIS_DATABASE_URL` using the Supavisor transaction pooler connection string
 - `OWNERSHIP_ANALYSIS_WEBHOOK_SECRET`
 - `GITHUB_TOKEN_ENCRYPTION_KEY`
 
@@ -416,7 +416,7 @@ Set Edge Function secrets:
 
 ```bash
 supabase secrets set \
-  SUPABASE_DB_URL="..." \
+  ANALYSIS_DATABASE_URL="..." \
   OWNERSHIP_ANALYSIS_WEBHOOK_SECRET="..." \
   GITHUB_TOKEN_ENCRYPTION_KEY="..."
 ```
