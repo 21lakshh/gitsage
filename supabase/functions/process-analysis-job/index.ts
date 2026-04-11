@@ -386,9 +386,68 @@ async function fetchCommitBatchActivities(input: {
 type QueueWebhookPayload = {
   record?: {
     msg_id: number;
-    message: OwnershipAnalysisQueueMessage;
+    message: OwnershipAnalysisQueueMessage | string;
   };
 };
+
+function normalizeWebhookPayload(rawPayload: unknown): {
+  msgId: number;
+  message: OwnershipAnalysisQueueMessage;
+} | null {
+  if (!rawPayload || typeof rawPayload !== "object") {
+    return null;
+  }
+
+  const record =
+    "record" in rawPayload && rawPayload.record && typeof rawPayload.record === "object"
+      ? rawPayload.record
+      : null;
+
+  if (!record || !("msg_id" in record)) {
+    return null;
+  }
+
+  const msgId = Number(record.msg_id);
+  if (!Number.isFinite(msgId) || msgId <= 0) {
+    return null;
+  }
+
+  if (!("message" in record)) {
+    return null;
+  }
+
+  const rawMessage = record.message;
+  const parsedMessage =
+    typeof rawMessage === "string"
+      ? (() => {
+          try {
+            return JSON.parse(rawMessage);
+          } catch {
+            return null;
+          }
+        })()
+      : rawMessage;
+
+  if (!parsedMessage || typeof parsedMessage !== "object") {
+    return null;
+  }
+
+  const message = parsedMessage as Partial<OwnershipAnalysisQueueMessage>;
+  if (
+    typeof message.run_id !== "string" ||
+    typeof message.repository_id !== "string" ||
+    typeof message.user_id !== "string" ||
+    typeof message.stage !== "string" ||
+    typeof message.attempt !== "number"
+  ) {
+    return null;
+  }
+
+  return {
+    msgId,
+    message: message as OwnershipAnalysisQueueMessage,
+  };
+}
 
 async function claimMessage(sql: postgres.Sql, msgId: number, runId: string, stage: string) {
   const rows = await sql`
@@ -1054,50 +1113,65 @@ Deno.serve(async (request) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const payload = (await request.json()) as QueueWebhookPayload;
-  const record = payload.record;
+  const rawBody = await request.text();
+  let payload: QueueWebhookPayload | null = null;
 
-  if (!record?.msg_id || !record.message?.run_id) {
+  try {
+    payload = JSON.parse(rawBody) as QueueWebhookPayload;
+  } catch {
+    console.error("Invalid webhook JSON body", rawBody);
+    return new Response("Invalid webhook payload.", { status: 400 });
+  }
+
+  const normalizedPayload = normalizeWebhookPayload(payload);
+
+  if (!normalizedPayload) {
+    console.error("Unexpected webhook payload shape", rawBody);
     return new Response("Invalid webhook payload.", { status: 400 });
   }
 
   const sql = createDb();
 
   try {
-    const claimed = await claimMessage(sql, record.msg_id, record.message.run_id, record.message.stage);
+    const claimed = await claimMessage(
+      sql,
+      normalizedPayload.msgId,
+      normalizedPayload.message.run_id,
+      normalizedPayload.message.stage,
+    );
 
     if (!claimed) {
-      return new Response(JSON.stringify({ status: "duplicate", msgId: record.msg_id }), {
+      return new Response(JSON.stringify({ status: "duplicate", msgId: normalizedPayload.msgId }), {
         status: 202,
         headers: { "content-type": "application/json" },
       });
     }
 
     try {
-      await processMessage(sql, record.msg_id, record.message);
+      await processMessage(sql, normalizedPayload.msgId, normalizedPayload.message);
     } catch (error) {
-      const run = await loadRun(sql, record.message.run_id);
+      const run = await loadRun(sql, normalizedPayload.message.run_id);
       const descriptor = classifyAnalysisError(error);
-      const nextAttempt = record.message.attempt + 1;
+      const nextAttempt = normalizedPayload.message.attempt + 1;
 
       if (run) {
         if (descriptor.retryable && nextAttempt <= Number(run.max_attempts ?? MAX_ATTEMPTS)) {
           await setRunStatus(sql, run.id as string, {
             status: "queued",
-            currentStage: record.message.stage,
+            currentStage: normalizedPayload.message.stage,
             progressPhase: "retrying",
             errorMessage: descriptor.message,
             lastErrorCode: descriptor.code,
             lastErrorMessage: descriptor.message,
           });
           await enqueueStageMessage(sql, {
-            ...record.message,
+            ...normalizedPayload.message,
             attempt: nextAttempt,
           }, 15);
         } else {
           await setRunStatus(sql, run.id as string, {
             status: nextAttempt > Number(run.max_attempts ?? MAX_ATTEMPTS) ? "dead_letter" : "failed",
-            currentStage: record.message.stage,
+            currentStage: normalizedPayload.message.stage,
             progressPhase: nextAttempt > Number(run.max_attempts ?? MAX_ATTEMPTS) ? "dead-letter" : "failed",
             errorMessage: descriptor.message,
             lastErrorCode: descriptor.code,
@@ -1108,10 +1182,10 @@ Deno.serve(async (request) => {
         }
       }
     } finally {
-      await deleteQueueMessage(sql, record.msg_id);
+      await deleteQueueMessage(sql, normalizedPayload.msgId);
     }
 
-    return new Response(JSON.stringify({ status: "ok", msgId: record.msg_id }), {
+    return new Response(JSON.stringify({ status: "ok", msgId: normalizedPayload.msgId }), {
       status: 200,
       headers: { "content-type": "application/json" },
     });
